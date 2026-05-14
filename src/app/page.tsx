@@ -86,10 +86,11 @@ export default function Home() {
       </div>
 
       {/* Trust Badges */}
-      <div className="flex justify-center gap-6 mb-6 text-xs text-gray-400">
+      <div className="flex justify-center gap-5 mb-6 text-xs text-gray-400 flex-wrap">
         <span>⚡ 30秒出稿</span>
         <span>🎯 精准小红书风格</span>
         <span>🆓 每日免费5次</span>
+        <a href="/cover" className="text-[#FF2442] font-medium hover:underline">🎨 封面生成</a>
       </div>
 
       {/* How it Works + Value Props */}
@@ -326,7 +327,7 @@ export default function Home() {
           小红书AI文案助手 · 让每一款好产品都被看见 ✨
         </div>
         <div className="text-[10px] text-gray-200">
-          每日免费5次 · 更多次数和高级风格即将上线
+          每日免费5次 · <a href="/cover" className="text-[#FF2442] hover:underline">🎨 AI封面生成</a> 已上线
         </div>
       </div>
     </main>
