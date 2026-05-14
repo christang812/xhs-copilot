@@ -69,18 +69,47 @@ export default function Home() {
 
   return (
     <main className="min-h-screen max-w-2xl mx-auto px-4 py-6 pb-24">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="text-4xl mb-2">✍️</div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          小红书AI文案助手
+      {/* Hero Section */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 bg-[#FFF0F0] text-[#FF2442] text-xs font-medium px-4 py-1.5 rounded-full mb-4">
+          🔥 已帮助 1,000+ 产品获得小红书爆款笔记
+        </div>
+        <h1 className="text-[28px] font-bold text-gray-900 leading-tight">
+          输入产品信息
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          输入产品描述，AI一键生成3版爆款文案
+        <h2 className="text-[28px] font-bold text-[#FF2442] leading-tight mt-1">
+          3秒生成3版爆款文案 ✨
+        </h2>
+        <p className="text-sm text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
+          告别绞尽脑汁写文案，AI为你生成<strong className="text-gray-700">走心故事型 · 干货教程型 · 对比测评型</strong>，覆盖小红书所有爆款风格
         </p>
       </div>
 
-      {/* Input Form */}
+      {/* Trust Badges */}
+      <div className="flex justify-center gap-6 mb-6 text-xs text-gray-400">
+        <span>⚡ 30秒出稿</span>
+        <span>🎯 精准小红书风格</span>
+        <span>🆓 每日免费5次</span>
+      </div>
+
+      {/* How it Works + Value Props */}
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-50">
+          <div className="text-xl mb-1">📝</div>
+          <div className="text-xs font-medium text-gray-700">描述产品</div>
+          <div className="text-[10px] text-gray-400 mt-0.5">30秒填完</div>
+        </div>
+        <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-50">
+          <div className="text-xl mb-1">🤖</div>
+          <div className="text-xs font-medium text-gray-700">AI创作</div>
+          <div className="text-[10px] text-gray-400 mt-0.5">3版风格</div>
+        </div>
+        <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-50">
+          <div className="text-xl mb-1">📋</div>
+          <div className="text-xs font-medium text-gray-700">一键复制</div>
+          <div className="text-[10px] text-gray-400 mt-0.5">直接发布</div>
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="xhs-card mb-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -275,16 +304,30 @@ export default function Home() {
 
       {/* Empty State */}
       {!loading && versions.length === 0 && !error && (
-        <div className="text-center py-12 text-gray-400">
-          <div className="text-5xl mb-4">📱</div>
-          <p className="text-sm">填入产品信息，让AI为你写文案</p>
-          <p className="text-xs mt-2">已为1000+产品生成小红书爆款文案 ✨</p>
+        <div className="text-center py-10 text-gray-400">
+          <div className="text-5xl mb-3">✍️</div>
+          <p className="text-sm font-medium text-gray-600">你离小红书爆款只差3步</p>
+          <p className="text-xs mt-2 text-gray-400 max-w-xs mx-auto leading-relaxed">
+            ① 填产品描述 → ② 选受众风格 → ③ 复制发布<br/>
+            <span className="text-[#FF2442]">全程不超过2分钟，每天免费生成5次</span>
+          </p>
+          <div className="mt-6 flex justify-center gap-3 text-xs text-gray-300">
+            <span>👩‍💼 电商卖家</span>
+            <span>👨‍🎤 自媒体博主</span>
+            <span>🧑‍🔧 实体店主</span>
+            <span>👩‍💻 品牌运营</span>
+          </div>
         </div>
       )}
 
       {/* Footer */}
-      <div className="text-center mt-8 text-xs text-gray-300">
-        小红书AI文案助手 · 让好产品被更多人看见
+      <div className="text-center mt-8 space-y-2">
+        <div className="text-xs text-gray-300">
+          小红书AI文案助手 · 让每一款好产品都被看见 ✨
+        </div>
+        <div className="text-[10px] text-gray-200">
+          每日免费5次 · 更多次数和高级风格即将上线
+        </div>
       </div>
     </main>
   );
