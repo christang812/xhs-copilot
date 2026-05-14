@@ -1,6 +1,26 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+
+// ─── localStorage keys ───
+const LS_DESIGNS = 'xhs-cover-designs';
+const LS_INPUT = 'xhs-cover-input';
+const LS_CTYPE = 'xhs-cover-ctype';
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch { return fallback; }
+}
+function saveToStorage(key: string, value: unknown) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* quota */ }
+}
+
+// ─── FONT — cross-platform Chinese font stack ───
+const FONT_STACK = `"PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", -apple-system, sans-serif`;
+const FONT_STACK_SERIF = `"Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif`;
 
 // ─── 2026 小红书设计色板 ───
 const PALETTES: Record<string, { bg: string; bg2: string; title: string; subtitle: string; accent: string; accent2: string; name: string }> = {
@@ -229,7 +249,7 @@ function drawDecorations(
       ctx.fillStyle = p.accent;
       ctx.fillRect(sealX, sealY, sealSize, sealSize);
       ctx.fillStyle = '#F7F5F0';
-      ctx.font = `500 ${sealSize * 0.5}px "Noto Serif SC", "Source Han Serif SC", serif`;
+      ctx.font = `500 ${sealSize * 0.5}px ${FONT_STACK_SERIF}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('封', sealX + sealSize / 2, sealY + sealSize / 2);
@@ -264,7 +284,7 @@ function drawDecorations(
       ctx.fillRect(noteX + noteW * 0.35, noteY - 8, noteW * 0.3, 16);
       // Text on sticky note
       ctx.fillStyle = hexToRgba(p.title, 0.15);
-      ctx.font = `400 ${18}px "KaiTi", "STKaiti", serif`;
+      ctx.font = `400 ${18}px ${FONT_STACK_SERIF}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('✨ 小编推荐', noteX + noteW / 2, noteY + noteH * 0.45);
@@ -289,7 +309,7 @@ function drawDecorations(
       ctx.fillStyle = hexToRgba(p.accent, 0.1);
       ctx.fillRect(W * 0.08, H * 0.92, 80, 22);
       ctx.fillStyle = hexToRgba(p.accent, 0.7);
-      ctx.font = `400 ${12}px -apple-system, "PingFang SC", sans-serif`;
+      ctx.font = `400 ${12}px ${FONT_STACK}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('📖 推荐阅读', W * 0.08 + 40, H * 0.92 + 11);
@@ -310,7 +330,7 @@ function drawTitle(
   ctx.textBaseline = 'top';
 
   // Measure and wrap
-  ctx.font = `bold ${fontSize}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
+  ctx.font = `bold ${fontSize}px ${FONT_STACK}`;
   
   let titleLines: string[] = [];
   let currentLine = '';
@@ -376,7 +396,7 @@ function drawTitle(
 
   ctx.textAlign = align;
   ctx.textBaseline = 'top';
-  ctx.font = `bold ${fontSize}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
+  ctx.font = `bold ${fontSize}px ${FONT_STACK}`;
 
   // Tight tracking for big titles (negative letter spacing)
   if (layout === 'magazine' || layout === 'dark') {
@@ -430,7 +450,7 @@ function drawSubtitle(
   titleFontSize: number,
 ) {
   const subSize = Math.floor(titleFontSize * 0.38);
-  ctx.font = `500 ${subSize}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
+  ctx.font = `500 ${subSize}px ${FONT_STACK}`;
   ctx.textBaseline = 'top';
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
@@ -447,7 +467,7 @@ function drawFooter(
 ) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = `400 ${11}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
+      ctx.font = `400 ${12}px ${FONT_STACK}`;
   ctx.fillStyle = hexToRgba(p.subtitle, 0.35);
   ctx.fillText(`xhs-cover  ⦁  ${PALETTES[design.palette]?.name || ''}`, W / 2, H * 0.97);
 }
@@ -552,14 +572,24 @@ const CONTENT_TYPES = [
 ];
 
 export default function CoverPage() {
-  const [input, setInput] = useState('');
-  const [contentType, setContentType] = useState('');
+  const [input, setInput] = useState(loadFromStorage(LS_INPUT, ''));
+  const [contentType, setContentType] = useState(loadFromStorage(LS_CTYPE, ''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [designs, setDesigns] = useState<CoverDesign[]>([]);
+  const [designs, setDesigns] = useState<CoverDesign[]>(loadFromStorage(LS_DESIGNS, []));
   const [activeTab, setActiveTab] = useState(0);
   const [dataUrls, setDataUrls] = useState<string[]>([]);
   const [mode, setMode] = useState<'text' | 'design'>('text');
+  const [isFromStorage, setIsFromStorage] = useState(() => !!loadFromStorage(LS_DESIGNS, []).length);
+
+  // Persist designs + input to localStorage on success
+  useEffect(() => {
+    if (designs.length > 0 && dataUrls.length === designs.length) {
+      saveToStorage(LS_DESIGNS, designs);
+      saveToStorage(LS_INPUT, input);
+      saveToStorage(LS_CTYPE, contentType);
+    }
+  }, [dataUrls, designs]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -613,6 +643,18 @@ export default function CoverPage() {
         link.click();
       }, i * 300);
     });
+  };
+
+  const clearAll = () => {
+    localStorage.removeItem(LS_DESIGNS);
+    localStorage.removeItem(LS_INPUT);
+    localStorage.removeItem(LS_CTYPE);
+    setDesigns([]);
+    setDataUrls([]);
+    setInput('');
+    setContentType('');
+    setActiveTab(0);
+    setIsFromStorage(false);
   };
 
   return (
@@ -720,7 +762,7 @@ export default function CoverPage() {
               <p className="text-sm font-medium text-red-700">设计失败了</p>
               <p className="text-xs text-red-500 mt-1">{error}</p>
               <button
-                onClick={handleSubmit}
+                onClick={() => { setError(''); handleSubmit({ preventDefault: () => {} } as React.FormEvent); }}
                 className="mt-2 text-xs text-red-600 underline"
               >
                 点击重试
@@ -734,7 +776,7 @@ export default function CoverPage() {
       {designs.length > 0 && !loading && (
         <div className="fade-in space-y-4">
           {/* Style Tab Switcher */}
-          <div className="flex gap-1.5 bg-white rounded-2xl p-1.5 shadow-sm border border-gray-100 overflow-x-auto">
+          <div className="flex items-center gap-1.5 bg-white rounded-2xl p-1.5 shadow-sm border border-gray-100 overflow-x-auto">
             {designs.map((d, i) => {
               const info = LAYOUT_INFO[d.layout] || { emoji: '🎨', name: d.layout };
               return (
@@ -751,6 +793,15 @@ export default function CoverPage() {
                 </button>
               );
             })}
+            {isFromStorage && (
+              <button
+                onClick={clearAll}
+                className="ml-auto text-[10px] text-gray-300 hover:text-gray-500 px-2 py-1 transition-colors"
+                title="清空上次记录"
+              >
+                ✕ 清除
+              </button>
+            )}
           </div>
 
           {/* Cover Display */}
